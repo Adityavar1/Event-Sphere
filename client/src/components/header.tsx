@@ -42,13 +42,6 @@ export default function Header() {
               >
                 Sports
               </Link>
-              <Link 
-                href="/theater" 
-                className="text-dark hover:text-primary font-medium transition-colors"
-                data-testid="link-theater"
-              >
-                Theater
-              </Link>
             </nav>
           </div>
           

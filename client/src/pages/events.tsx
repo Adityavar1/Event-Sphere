@@ -21,8 +21,6 @@ export default function Events() {
   useEffect(() => {
     if (location === "/sports") {
       setSelectedCategory("sports");
-    } else if (location === "/theater") {
-      setSelectedCategory("theater");
     } else if (location === "/festival") {
       setSelectedCategory("festival");
     } else {
@@ -32,6 +30,17 @@ export default function Events() {
 
   const { data: allEvents = [], isLoading } = useQuery<EventWithVenue[]>({
     queryKey: ["/api/events", selectedCategory, selectedCity, searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedCategory) params.append('category', selectedCategory);
+      if (selectedCity && selectedCity !== 'all') params.append('city', selectedCity);
+      if (searchTerm) params.append('search', searchTerm);
+      
+      const url = `/api/events${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`${response.status}: ${response.statusText}`);
+      return response.json();
+    },
   });
 
   const cities = Array.from(new Set(allEvents.map(event => `${event.venue.city}, ${event.venue.state}`)));
@@ -55,7 +64,6 @@ export default function Events() {
   const eventsByCategory = {
     concert: filteredEvents.filter(e => e.category === 'concert'),
     sports: filteredEvents.filter(e => e.category === 'sports'),
-    theater: filteredEvents.filter(e => e.category === 'theater'),
     festival: filteredEvents.filter(e => e.category === 'festival'),
   };
 
@@ -118,7 +126,7 @@ export default function Events() {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="all" className="w-full" onValueChange={handleCategoryChange}>
-            <TabsList className="grid w-full grid-cols-5 mb-8">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="all" data-testid="tab-all-events">All Events</TabsTrigger>
               <TabsTrigger value="concert" data-testid="tab-concerts">
                 <Music className="w-4 h-4 mr-2" />
@@ -127,10 +135,6 @@ export default function Events() {
               <TabsTrigger value="sports" data-testid="tab-sports">
                 <Trophy className="w-4 h-4 mr-2" />
                 Sports
-              </TabsTrigger>
-              <TabsTrigger value="theater" data-testid="tab-theater">
-                <Theater className="w-4 h-4 mr-2" />
-                Theater
               </TabsTrigger>
               <TabsTrigger value="festival" data-testid="tab-festivals">
                 <Calendar className="w-4 h-4 mr-2" />

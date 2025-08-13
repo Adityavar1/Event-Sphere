@@ -29,7 +29,6 @@ function Router() {
           <Route path="/movies" component={Movies} />
           <Route path="/movies/:id" component={MovieDetails} />
           <Route path="/sports" component={() => <Events />} />
-          <Route path="/theater" component={() => <Events />} />
           <Route path="/festival" component={() => <Events />} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/dashboard" component={Dashboard} />
