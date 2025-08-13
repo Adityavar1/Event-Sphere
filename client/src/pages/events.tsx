@@ -42,7 +42,7 @@ export default function Events() {
       event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.venue.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCity = !selectedCity || `${event.venue.city}, ${event.venue.state}` === selectedCity;
+    const matchesCity = !selectedCity || selectedCity === "all" || `${event.venue.city}, ${event.venue.state}` === selectedCity;
     const matchesCategory = !selectedCategory || event.category === selectedCategory;
     
     return matchesSearch && matchesCity && matchesCategory;
@@ -103,7 +103,7 @@ export default function Events() {
                   <SelectValue placeholder="All cities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All cities</SelectItem>
+                  <SelectItem value="all">All cities</SelectItem>
                   {cities.map((city) => (
                     <SelectItem key={city} value={city}>{city}</SelectItem>
                   ))}

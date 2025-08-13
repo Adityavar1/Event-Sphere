@@ -76,7 +76,7 @@ export default function Movies() {
                   <SelectValue placeholder="All cities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All cities</SelectItem>
+                  <SelectItem value="all">All cities</SelectItem>
                   {cities.map((city) => (
                     <SelectItem key={city} value={city}>{city}</SelectItem>
                   ))}

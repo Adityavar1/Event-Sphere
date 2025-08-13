@@ -118,17 +118,16 @@ export class DatabaseStorage implements IStorage {
 
   // Event operations
   async getEvents(filters?: { category?: string; city?: string; searchTerm?: string }): Promise<EventWithVenue[]> {
-    const conditions = [
-      eq(events.isActive, true),
-      gte(events.eventDate, new Date())
-    ];
+    const conditions = [eq(events.isActive, true)];
 
     if (filters?.category) {
       conditions.push(eq(events.category, filters.category as any));
     }
 
     if (filters?.city) {
-      conditions.push(eq(venues.city, filters.city));
+      // Parse city format "City, State" and match against city
+      const cityPart = filters.city.split(',')[0].trim();
+      conditions.push(eq(venues.city, cityPart));
     }
 
     if (filters?.searchTerm) {
