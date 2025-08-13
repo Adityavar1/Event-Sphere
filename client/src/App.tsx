@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import Events from "@/pages/events";
+import Movies from "@/pages/movies";
 import EventDetails from "@/pages/event-details";
 import MovieDetails from "@/pages/movie-details";
 import Checkout from "@/pages/checkout";
@@ -22,8 +24,13 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/events" component={Events} />
           <Route path="/events/:id" component={EventDetails} />
+          <Route path="/movies" component={Movies} />
           <Route path="/movies/:id" component={MovieDetails} />
+          <Route path="/sports" component={() => <Events />} />
+          <Route path="/theater" component={() => <Events />} />
+          <Route path="/festival" component={() => <Events />} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/dashboard" component={Dashboard} />
         </>

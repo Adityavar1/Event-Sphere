@@ -22,7 +22,7 @@ export default function Header() {
             </Link>
             <nav className="hidden md:flex ml-10 space-x-8">
               <Link 
-                href="/" 
+                href="/events" 
                 className="text-dark hover:text-primary font-medium transition-colors"
                 data-testid="link-events"
               >
@@ -60,7 +60,7 @@ export default function Header() {
                 data-testid="button-location"
               >
                 <MapPin className="mr-2 h-4 w-4" />
-                <span>{user?.location || "New York, NY"}</span>
+                <span>{"New York, NY"}</span>
               </Button>
               
               <Button 
@@ -74,14 +74,14 @@ export default function Header() {
               
               <div className="flex items-center space-x-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage src={user?.profileImageUrl} alt="User profile" />
+                  <AvatarImage src={(user as any)?.profileImageUrl} alt="User profile" />
                   <AvatarFallback>
-                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                    {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:flex flex-col">
                   <span className="font-medium text-dark text-sm" data-testid="text-user-name">
-                    {user?.firstName} {user?.lastName}
+                    {(user as any)?.firstName} {(user as any)?.lastName}
                   </span>
                   <Button 
                     variant="ghost" 
