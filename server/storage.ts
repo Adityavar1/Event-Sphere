@@ -32,7 +32,7 @@ import {
   type InsertMovieBookingSeat,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, desc, asc, sql, ilike, or } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, sql, ilike, or, notInArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -118,7 +118,29 @@ export class DatabaseStorage implements IStorage {
 
   // Event operations
   async getEvents(filters?: { category?: string; city?: string; searchTerm?: string }): Promise<EventWithVenue[]> {
-    let query = db
+    const conditions = [
+      eq(events.isActive, true),
+      gte(events.eventDate, new Date())
+    ];
+
+    if (filters?.category) {
+      conditions.push(eq(events.category, filters.category as any));
+    }
+
+    if (filters?.city) {
+      conditions.push(eq(venues.city, filters.city));
+    }
+
+    if (filters?.searchTerm) {
+      conditions.push(
+        or(
+          ilike(events.title, `%${filters.searchTerm}%`),
+          ilike(events.description, `%${filters.searchTerm}%`)
+        )!
+      );
+    }
+
+    const results = await db
       .select({
         id: events.id,
         title: events.title,
@@ -144,39 +166,9 @@ export class DatabaseStorage implements IStorage {
       })
       .from(events)
       .innerJoin(venues, eq(events.venueId, venues.id))
-      .where(and(
-        eq(events.isActive, true),
-        gte(events.eventDate, new Date())
-      ));
-
-    if (filters?.category) {
-      query = query.where(and(
-        eq(events.isActive, true),
-        gte(events.eventDate, new Date()),
-        eq(events.category, filters.category as any)
-      ));
-    }
-
-    if (filters?.city) {
-      query = query.where(and(
-        eq(events.isActive, true),
-        gte(events.eventDate, new Date()),
-        eq(venues.city, filters.city)
-      ));
-    }
-
-    if (filters?.searchTerm) {
-      query = query.where(and(
-        eq(events.isActive, true),
-        gte(events.eventDate, new Date()),
-        or(
-          ilike(events.title, `%${filters.searchTerm}%`),
-          ilike(events.description, `%${filters.searchTerm}%`)
-        )
-      ));
-    }
-
-    const results = await query.orderBy(asc(events.eventDate));
+      .where(and(...conditions))
+      .orderBy(asc(events.eventDate));
+    
     return results;
   }
 
@@ -270,13 +262,24 @@ export class DatabaseStorage implements IStorage {
 
   // Theater operations
   async getTheaters(city?: string): Promise<Theater[]> {
-    let query = db.select().from(theaters);
+    const conditions = [];
     
     if (city) {
-      query = query.where(eq(theaters.city, city));
+      conditions.push(eq(theaters.city, city));
     }
     
-    return await query.orderBy(asc(theaters.name));
+    if (conditions.length > 0) {
+      return await db
+        .select()
+        .from(theaters)
+        .where(and(...conditions))
+        .orderBy(asc(theaters.name));
+    } else {
+      return await db
+        .select()
+        .from(theaters)
+        .orderBy(asc(theaters.name));
+    }
   }
 
   async getTheaterById(id: string): Promise<Theater | undefined> {
@@ -291,7 +294,31 @@ export class DatabaseStorage implements IStorage {
 
   // Showtime operations
   async getShowtimes(movieId?: string, theaterId?: string, date?: Date): Promise<(Showtime & { movie: Movie; theater: Theater })[]> {
-    let query = db
+    const conditions = [gte(showtimes.showDate, new Date())];
+
+    if (movieId) {
+      conditions.push(eq(showtimes.movieId, movieId));
+    }
+
+    if (theaterId) {
+      conditions.push(eq(showtimes.theaterId, theaterId));
+    }
+
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      conditions.push(
+        and(
+          gte(showtimes.showDate, startOfDay),
+          lte(showtimes.showDate, endOfDay)
+        )!
+      );
+    }
+
+    return await db
       .select({
         id: showtimes.id,
         movieId: showtimes.movieId,
@@ -330,35 +357,8 @@ export class DatabaseStorage implements IStorage {
       .from(showtimes)
       .innerJoin(movies, eq(showtimes.movieId, movies.id))
       .innerJoin(theaters, eq(showtimes.theaterId, theaters.id))
-      .where(gte(showtimes.showDate, new Date()));
-
-    if (movieId) {
-      query = query.where(and(
-        gte(showtimes.showDate, new Date()),
-        eq(showtimes.movieId, movieId)
-      ));
-    }
-
-    if (theaterId) {
-      query = query.where(and(
-        gte(showtimes.showDate, new Date()),
-        eq(showtimes.theaterId, theaterId)
-      ));
-    }
-
-    if (date) {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-      
-      query = query.where(and(
-        gte(showtimes.showDate, startOfDay),
-        gte(showtimes.showDate, endOfDay)
-      ));
-    }
-
-    return await query.orderBy(asc(showtimes.showDate));
+      .where(and(...conditions))
+      .orderBy(asc(showtimes.showDate));
   }
 
   async createShowtime(showtime: InsertShowtime): Promise<Showtime> {
@@ -394,16 +394,17 @@ export class DatabaseStorage implements IStorage {
     const bookedSeatIds = bookedSeats.map(bs => bs.seatId);
 
     // Get available seats
-    let query = db
-      .select()
-      .from(seats)
-      .where(eq(seats.venueId, eventResult[0].venueId));
-
+    const conditions = [eq(seats.venueId, eventResult[0].venueId)];
+    
     if (bookedSeatIds.length > 0) {
-      query = query.where(sql`${seats.id} NOT IN (${bookedSeatIds.map(id => `'${id}'`).join(',')})`);
+      conditions.push(notInArray(seats.id, bookedSeatIds));
     }
 
-    return await query.orderBy(asc(seats.row), asc(seats.seatNumber));
+    return await db
+      .select()
+      .from(seats)
+      .where(and(...conditions))
+      .orderBy(asc(seats.row), asc(seats.seatNumber));
   }
 
   async createSeat(seat: InsertSeat): Promise<Seat> {
