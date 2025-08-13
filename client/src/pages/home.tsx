@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Music, Film, Trophy, Theater } from "lucide-react";
+import { Search, Music, Film, Trophy } from "lucide-react";
 import type { EventWithVenue, Movie, Theater as TheaterType } from "@shared/schema";
 
 export default function Home() {
@@ -36,8 +36,7 @@ export default function Home() {
     });
   };
 
-  const featuredEvents = events.slice(0, 3);
-  const recommendedEvents = events.slice(3, 7);
+  const featuredEvents = events.slice(0, 6);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -108,12 +107,11 @@ export default function Home() {
 
           {/* Category Quick Access */}
           <div className="max-w-4xl mx-auto mt-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { icon: Music, label: "Concerts", category: "concert" },
                 { icon: Film, label: "Movies", category: "movie" },
                 { icon: Trophy, label: "Sports", category: "sports" },
-                { icon: Theater, label: "Theater", category: "theater" },
               ].map((item) => (
                 <button 
                   key={item.category}
@@ -161,21 +159,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Recommended Events */}
-            <div className="mb-12">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-dark">Recommended For You</h2>
-                <button className="text-primary hover:text-primary/80 font-semibold" data-testid="link-view-all-recommended">
-                  View All
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {recommendedEvents.map((event) => (
-                  <EventCard key={event.id} event={event} variant="compact" />
-                ))}
-              </div>
-            </div>
+
           </TabsContent>
 
           <TabsContent value="movies">

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Calendar, Music, Trophy, Theater } from "lucide-react";
+import { Search, Calendar, Music, Trophy } from "lucide-react";
 import type { EventWithVenue } from "@shared/schema";
 
 export default function Events() {
