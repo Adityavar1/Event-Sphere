@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import EventCard from "@/components/event-card";
@@ -109,19 +110,19 @@ export default function Home() {
           <div className="max-w-4xl mx-auto mt-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { icon: Music, label: "Concerts", category: "concert" },
-                { icon: Film, label: "Movies", category: "movie" },
-                { icon: Trophy, label: "Sports", category: "sports" },
+                { icon: Music, label: "Concerts", href: "/events", category: "concert" },
+                { icon: Film, label: "Movies", href: "/movies", category: "movie" },
+                { icon: Trophy, label: "Sports", href: "/sports", category: "sports" },
               ].map((item) => (
-                <button 
+                <Link 
                   key={item.category}
-                  onClick={() => setEventFilters({ ...eventFilters, category: item.category })}
-                  className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 text-center hover:bg-white/20 transition-colors group"
+                  href={item.href}
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 text-center hover:bg-white/20 transition-colors group block"
                   data-testid={`button-category-${item.category}`}
                 >
                   <item.icon className="text-3xl text-white mb-3 mx-auto group-hover:scale-110 transition-transform" />
                   <p className="text-white font-semibold">{item.label}</p>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
@@ -147,9 +148,9 @@ export default function Home() {
             <div className="mb-12">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold text-dark">Featured Events</h2>
-                <button className="text-primary hover:text-primary/80 font-semibold" data-testid="link-view-all-events">
+                <Link href="/events" className="text-primary hover:text-primary/80 font-semibold" data-testid="link-view-all-events">
                   View All
-                </button>
+                </Link>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
