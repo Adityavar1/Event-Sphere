@@ -2,7 +2,16 @@
 
 ## Overview
 
-EventSphere is a full-stack web application for discovering and booking tickets to various entertainment events including concerts, movies, sports, theater shows, and festivals. The platform provides a comprehensive event discovery experience with seat selection, booking management, and user authentication through Replit's OpenID Connect system.
+EventSphere is a full-stack web application for discovering and booking tickets to various entertainment events including concerts, movies, and sports. The platform provides a comprehensive event discovery experience with seat selection, booking management, user authentication, and custom image generation for movie posters. Built with modern web technologies and deployed on Replit's cloud infrastructure.
+
+## Recent Changes (August 2025)
+- Completely removed theater functionality as requested by user
+- Streamlined to focus on 3 main categories: Concerts, Movies, Sports
+- Generated custom movie poster images for all films using AI image generation
+- Fixed responsive navigation and category filtering
+- Enhanced database with 6 sports events across multiple cities
+- Removed "Recommended For You" sections to simplify user experience
+- Implemented proper static asset serving for generated images
 
 ## User Preferences
 
