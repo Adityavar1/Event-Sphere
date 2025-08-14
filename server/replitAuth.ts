@@ -72,6 +72,42 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Check if running in local development
+  const isLocal = process.env.NODE_ENV === 'development' && 
+                  (process.env.REPLIT_DOMAINS?.includes('localhost') || 
+                   process.env.REPLIT_DOMAINS?.includes('127.0.0.1'));
+
+  if (isLocal) {
+    // Local development auth bypass
+    app.get("/api/login", (req, res) => {
+      // Mock user session for local development
+      (req.session as any).passport = {
+        user: {
+          claims: {
+            sub: "dev-user-123",
+            email: "dev@localhost.com",
+            first_name: "Developer",
+            last_name: "User",
+            profile_image_url: null
+          }
+        }
+      };
+      res.redirect("/");
+    });
+
+    app.get("/api/logout", (req, res) => {
+      req.session.destroy(() => {
+        res.redirect("/");
+      });
+    });
+
+    app.get("/api/callback", (req, res) => {
+      res.redirect("/");
+    });
+
+    return; // Skip OIDC setup for local development
+  }
+
   const config = await getOidcConfig();
 
   const verify: VerifyFunction = async (
@@ -128,6 +164,21 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // Check if running in local development
+  const isLocal = process.env.NODE_ENV === 'development' && 
+                  (process.env.REPLIT_DOMAINS?.includes('localhost') || 
+                   process.env.REPLIT_DOMAINS?.includes('127.0.0.1'));
+
+  if (isLocal) {
+    // Mock authentication for local development
+    const sessionData = req.session as any;
+    if (!sessionData.passport?.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    req.user = sessionData.passport.user;
+    return next();
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {
